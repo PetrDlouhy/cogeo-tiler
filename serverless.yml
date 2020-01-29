@@ -6,22 +6,22 @@ provider:
   stage: ${opt:stage, 'production'}
   region: ${opt:region, 'us-east-1'}
 
-  ##############################################################################
+  #############################################################################
   # Optional
   # Add Tags to resources
-  # stackTags:
-  #   project: cogeo
+  stackTags:
+    project: labs
 
-  # deploymentBucket: ${opt:bucket}
+  deploymentBucket: ${opt:bucket}
   
-  # # Add IAM Role statements to allow the tiler to access files to some bucket
-  # iamRoleStatements:
-  # -  Effect: "Allow"
-  #    Action:
-  #      - "*"
-  #    Resource:
-  #      - "arn:aws:s3:::${opt:bucket}*"
-  ##############################################################################
+  # Add IAM Role statements to allow the tiler to access files to some bucket
+  iamRoleStatements:
+  -  Effect: "Allow"
+     Action:
+       - "*"
+     Resource:
+       - "arn:aws:s3:::${opt:bucket}*"
+  #############################################################################
   
   apiGateway:
     binaryMediaTypes:

@@ -153,10 +153,7 @@ def metadata_handler(
     tag=["tiles"],
 )
 def tilejson_handler(
-    url: str,
-    tile_format: str = "png",
-    tile_scale: int = 1,
-    **kwargs: Any
+    url: str, tile_format: str = "png", tile_scale: int = 1, **kwargs: Any
 ) -> Tuple[str, str, str]:
     """Handle /tilejson.json requests."""
     if tile_scale is not None and isinstance(tile_scale, str):
@@ -168,9 +165,11 @@ def tilejson_handler(
 
     with rasterio.Env(aws_session):
         with rasterio.open(url) as src_dst:
-            bounds = list(warp.transform_bounds(
-                src_dst.crs, "epsg:4326", *src_dst.bounds, densify_pts=21
-            ))
+            bounds = list(
+                warp.transform_bounds(
+                    src_dst.crs, "epsg:4326", *src_dst.bounds, densify_pts=21
+                )
+            )
             minzoom, maxzoom = get_zooms(src_dst)
             center = [(bounds[0] + bounds[2]) / 2, (bounds[1] + bounds[3]) / 2, minzoom]
 
@@ -213,15 +212,15 @@ def wmts_handler(
     query_string = urllib.parse.urlencode(list(kwargs.items()))
 
     # & is an invalid character in XML
-    query_string = query_string.replace(
-        "&", "&amp;"
-    )
+    query_string = query_string.replace("&", "&amp;")
 
     with rasterio.Env(aws_session):
         with rasterio.open(url) as src_dst:
-            bounds = list(warp.transform_bounds(
-                src_dst.crs, "epsg:4326", *src_dst.bounds, densify_pts=21
-            ))
+            bounds = list(
+                warp.transform_bounds(
+                    src_dst.crs, "epsg:4326", *src_dst.bounds, densify_pts=21
+                )
+            )
             minzoom, maxzoom = get_zooms(src_dst)
 
     return (
@@ -329,9 +328,7 @@ def tile_handler(
     if not ext:
         ext = "jpg" if mask.all() else "png"
 
-    rtile = _postprocess(
-        tile, mask, rescale=rescale, color_formula=color_formula
-    )
+    rtile = _postprocess(tile, mask, rescale=rescale, color_formula=color_formula)
 
     if color_map:
         color_map = get_colormap(color_map, format="gdal")
@@ -373,10 +370,7 @@ def tile_handler(
     tag=["point"],
 )
 def point_handler(
-    url: str,
-    lon: float,
-    lat: float,
-    indexes: Union[str, Tuple[int]] = None,
+    url: str, lon: float, lat: float, indexes: Union[str, Tuple[int]] = None,
 ) -> Tuple[str, str, str]:
     """Handle /point requests."""
     if isinstance(indexes, str):
@@ -390,9 +384,7 @@ def point_handler(
 
     with rasterio.Env(aws_session):
         with rasterio.open(url) as src_dst:
-            lon_srs, lat_srs = warp.transform(
-                "epsg:4326", src_dst.crs, [lon], [lat]
-            )
+            lon_srs, lat_srs = warp.transform("epsg:4326", src_dst.crs, [lon], [lat])
 
             if not (
                 (src_dst.bounds[0] < lon_srs[0] < src_dst.bounds[2])

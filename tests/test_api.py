@@ -212,7 +212,10 @@ def test_API_wmts(event):
     headers = res["headers"]
     assert headers["Content-Type"] == "application/xml"
     assert res["body"]
-    assert "https://somewhere-over-the-rainbow.com/{TileMatrix}/{TileCol}/{TileRow}@2x.png?url" in res["body"]
+    assert (
+        "https://somewhere-over-the-rainbow.com/{TileMatrix}/{TileCol}/{TileRow}@2x.png?url"
+        in res["body"]
+    )
 
 
 def test_API_point(event):
@@ -285,7 +288,7 @@ def test_API_tiles(event):
     event["queryStringParameters"] = {
         "url": cog_path,
         "rescale": "0,10000",
-        "color_formula": "Gamma R 3.0"
+        "color_formula": "Gamma R 3.0",
     }
     res = app(event, {})
     assert res["statusCode"] == 200
