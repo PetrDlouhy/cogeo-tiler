@@ -1,13 +1,15 @@
-# lambda-tiler
+# cogeo-tiler
 
-[![CircleCI](https://circleci.com/gh/vincentsarago/lambda-tiler.svg?style=svg)](https://circleci.com/gh/vincentsarago/lambda-tiler)
-[![codecov](https://codecov.io/gh/vincentsarago/lambda-tiler/branch/master/graph/badge.svg)](https://codecov.io/gh/vincentsarago/lambda-tiler)
+[![CircleCI](https://circleci.com/gh/developmentseed/cogeo-tiler.svg?style=svg)](https://circleci.com/gh/developmentseed/cogeo-tiler)
+[![codecov](https://codecov.io/gh/developmentseed/cogeo-tiler/branch/master/graph/badge.svg)](https://codecov.io/gh/developmentseed/cogeo-tiler)
+
+This project is a fork of https://github.com/vincentsarago/lambda-tiler
 
 #### AWS Lambda + rio-tiler to serve tiles from any web hosted files
 
 ![image_preview](https://user-images.githubusercontent.com/10407788/56755674-0fbad500-675e-11e9-8996-f0fae4a1a30c.jpeg)
 
-**lambda-tiler** is a simple serverless (AWS Lambda function) application that serves Map Tiles dynamically created from COGs hosted remotely (s3, http, ...)
+**cogeo-tiler** is a simple serverless (AWS Lambda function) application that serves Map Tiles dynamically created from COGs hosted remotely (s3, http, ...)
 
 # Deploy
 
@@ -16,25 +18,14 @@
   - Docker (+ docker-compose)
   - node + npm (serverless)
 
-
 #### Create the package
-
 ```bash
 # Build Amazon linux AMI docker container + Install Python modules + create package
-$ git clone https://github.com/vincentsarago/lambda-tiler.git
-$ cd lambda-tiler/
-
-$ docker-compose build
-$ docker-compose run --rm package
-
-# Tests
-$ docker-compose run --rm tests
+$ git clone https://github.com/developmentseed/cogeo-tiler.git
+$ cd cogeo-tiler && make package
 ```
 
-Note: Docker image from https://github.com/RemotePixel/amazonlinux-gdal
-
 #### Deploy to AWS
-
 ```bash
 #configure serverless (https://serverless.com/framework/docs/providers/aws/guide/credentials/)
 npm install
@@ -42,20 +33,6 @@ sls deploy
 ```
 
 # API
-
-## Viewer
-`/viewer` - GET
-
-A web viewer that allows you to pan & zoom the COG.
-
-Inputs:
-- **url** (required, str): mosaic id
-- **kwargs** (optional): Other querystring parameters will be forwarded to the tile url.
-
-Outputs:
-- **html** (text/html)
-
-`$ curl {your-endpoint}/viewer?url=https://any-file.on/the-internet.tif`
 
 ## TileJSON (2.1.0)
 `/tilejson.json` - GET
@@ -73,7 +50,7 @@ Outputs:
 ```json
 {
     "bounds": [...],      
-    "center": [lon, lat], 
+    "center": [..., ..., 18], 
     "minzoom": 18,        
     "maxzoom": 22,        
     "name": "the-internet.tif",
@@ -143,13 +120,13 @@ Outputs:
 
 
 ## Tiles
-`/tiles/{z}/{x}/{y}` - GET
+`/{z}/{x}/{y}` - GET
 
-`/tiles/{z}/{x}/{y}.{ext}` - GET
+`/{z}/{x}/{y}.{ext}` - GET
 
-`/tiles/{z}/{x}/{y}@{scale}x` - GET
+`/{z}/{x}/{y}@{scale}x` - GET
 
-`/tiles/{z}/{x}/{y}@{scale}x.{ext}` - GET
+`/{z}/{x}/{y}@{scale}x.{ext}` - GET
 
 Inputs:
 - **z**: Mercator tile zoom value
@@ -168,19 +145,8 @@ Inputs:
 Outputs:
 - **image body** (image/jpeg) 
 
-`$ curl {your-endpoint}/tiles/7/10/10.png?url=https://any-file.on/the-internet.tif`
+`$ curl {your-endpoint}/7/10/10.png?url=https://any-file.on/the-internet.tif`
 
 Note: 
 - **expr** and **indexes** cannot be passed used together
 - if no **ext** passed, lambda-tiler will choose the best format (jpg or png) depending on mask (use png for tile with nodata)
-
-## Example
-
-A web viewer that allows you to pan & zoom on a sample tiff.
-
-Inputs: None
-
-Outputs:
-- **html** (text/html)
-
-`$ curl {your-endpoint}/example`

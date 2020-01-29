@@ -1,4 +1,4 @@
-"""Test lambda-tiler locally."""
+"""Test cogeo-tiler locally."""
 
 import click
 import base64
@@ -8,10 +8,10 @@ from socketserver import ThreadingMixIn
 from urllib.parse import urlparse, parse_qsl
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
-from lambda_tiler.handler import APP
+from cogeo_tiler.handler import app
 
 # Local server is unsecure
-APP.https = False
+app.https = False
 
 
 class ThreadingSimpleServer(ThreadingMixIn, HTTPServer):
@@ -32,7 +32,7 @@ class Handler(BaseHTTPRequestHandler):
             "queryStringParameters": dict(parse_qsl(q.query)),
             "httpMethod": self.command,
         }
-        response = APP(request, None)
+        response = app(request, None)
 
         self.send_response(int(response["statusCode"]))
         for r in response["headers"]:
@@ -42,30 +42,6 @@ class Handler(BaseHTTPRequestHandler):
         if response.get("isBase64Encoded"):
             response["body"] = base64.b64decode(response["body"])
 
-        if isinstance(response["body"], str):
-            self.wfile.write(bytes(response["body"], "utf-8"))
-        else:
-            self.wfile.write(response["body"])
-
-    def do_POST(self):
-        """POST requests."""
-        q = urlparse(self.path)
-        body = self.rfile.read(int(dict(self.headers).get("Content-Length")))
-        body = base64.b64encode(body).decode()
-        request = {
-            "headers": dict(self.headers),
-            "path": q.path,
-            "queryStringParameters": dict(parse_qsl(q.query)),
-            "body": body,
-            "httpMethod": self.command,
-        }
-
-        response = APP(request, None)
-
-        self.send_response(int(response["statusCode"]))
-        for r in response["headers"]:
-            self.send_header(r, response["headers"][r])
-        self.end_headers()
         if isinstance(response["body"], str):
             self.wfile.write(bytes(response["body"], "utf-8"))
         else:

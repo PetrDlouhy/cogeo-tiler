@@ -1,5 +1,5 @@
 {
-    "name": "lambda-tiler",
+    "name": "cogeo-tiler",
     "version": "1.1.0",
     "description": "Create a highly customizable `serverless` tile server",
     "devDependencies": {
@@ -7,7 +7,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git://github.com/vincentsarago/lambda-tiler.git"
+        "url": "git://github.com/developmentseed/cogeo-tiler.git"
     },
     "author": "Vincent Sarago"
 }

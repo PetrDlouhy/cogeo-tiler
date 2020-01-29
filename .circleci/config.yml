@@ -1,6 +1,6 @@
 version: 2
 common: &common
-  working_directory: ~/lambda-tiler
+  working_directory: ~/cogeo-tiler
   steps:
     - checkout
     - run:
@@ -12,7 +12,7 @@ common: &common
     - run:
         name: run pre-commit
         command: |
-          if [[ "$CIRCLE_JOB" == "python-3.6" ]]; then
+          if [[ "$CIRCLE_JOB" == "python-3.7" ]]; then
              ~/.local/bin/pre-commit run --all-files
           fi
     - run:
