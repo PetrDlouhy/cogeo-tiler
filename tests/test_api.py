@@ -87,7 +87,7 @@ def test_API_tilejson(event):
         f"https://somewhere-over-the-rainbow.com/{{z}}/{{x}}/{{y}}@2x.png?{urlqs}"
     )
     assert len(body["bounds"]) == 4
-    assert len(body["center"]) == 2
+    assert len(body["center"]) == 3
     assert body["minzoom"] == 6
     assert body["maxzoom"] == 8
 
@@ -392,7 +392,7 @@ def test_API_tiles(event):
     assert datamask.shape == (256, 256)
 
 
-@patch("lambda_tiler.handler.cogTiler.tile")
+@patch("cogeo_tiler.handler.cogTiler.tile")
 def test_API_tilesMock(tiler, event):
     """Tests if route pass the right variables."""
     from cogeo_tiler.handler import app
