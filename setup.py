@@ -12,7 +12,7 @@ extra_reqs = {
 
 setup(
     name="cogeo-tiler",
-    version="0.0.1",
+    version="0.0.2",
     description=u"Create and serve Map tile from Cloud Optimized GeoTIFF.",
     long_description=u"Create and serve Map tile from Cloud Optimized GeoTIFF.",
     python_requires=">=3",

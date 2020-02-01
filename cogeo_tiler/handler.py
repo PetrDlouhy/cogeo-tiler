@@ -153,7 +153,7 @@ def metadata_handler(
     tag=["tiles"],
 )
 def tilejson_handler(
-    url: str, tile_format: str = "png", tile_scale: int = 1, **kwargs: Any
+    url: str, tile_scale: int = 1, tile_format: str = None, **kwargs: Any
 ) -> Tuple[str, str, str]:
     """Handle /tilejson.json requests."""
     if tile_scale is not None and isinstance(tile_scale, str):
@@ -161,7 +161,10 @@ def tilejson_handler(
 
     kwargs.update(dict(url=url))
     qs = urllib.parse.urlencode(list(kwargs.items()))
-    tile_url = f"{app.host}/{{z}}/{{x}}/{{y}}@{tile_scale}x.{tile_format}?{qs}"
+    if tile_format:
+        tile_url = f"{app.host}/{{z}}/{{x}}/{{y}}@{tile_scale}x.{tile_format}?{qs}"
+    else:
+        tile_url = f"{app.host}/{{z}}/{{x}}/{{y}}@{tile_scale}x?{qs}"
 
     with rasterio.Env(aws_session):
         with rasterio.open(url) as src_dst:
