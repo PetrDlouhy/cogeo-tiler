@@ -236,14 +236,14 @@
                             <input value="raster" checked="checked" name='toggle-viz' type='radio' />
                             <div title='Raster Viz' class='toggle color-gray-dark-on-hover'><svg class='icon icon--l inline-block w18 h18'><use xlink:href='#icon-raster'/></svg></div>
                         </label>
-                        <label class='toggle-container'>
+                        <!-- <label class='toggle-container'>
                             <input value="point" name='toggle-viz' type='radio' />
                             <div title='Point Viz' class='toggle color-gray-dark-on-hover'><svg class='icon icon--l inline-block w18 h18'><use xlink:href='#icon-circle'/></svg></div>
                         </label>
                         <label class='toggle-container'>
                             <input value="polygon" name='toggle-viz' type='radio' />
                             <div title='3D Viz' class='toggle color-gray-dark-on-hover'><svg class='icon icon--l inline-block w18 h18'><use xlink:href='#icon-extrusion'/></svg></div>
-                        </label>
+                        </label> -->
                     </div>
 
                     <!-- 1b Histogram -->
@@ -370,7 +370,6 @@ const set1bViz = () => {
     let params = {
         url: scope.url,
         resampling_method: document.getElementById('resamp-selector').querySelector("input[name='toggle-resamp']:checked").value,
-        tile_format: 'png'
     }
 
     const vizType = document.getElementById('viz-selector').querySelector("input[name='toggle-viz']:checked").value
@@ -389,27 +388,23 @@ const set1bViz = () => {
 
             const url_params = Object.keys(params).map(i => `${i}=${params[i]}`).join('&')
             let url = `${api_endpoint}/tilejson.json?${url_params}`
-
-            map.addSource('raster', { type: 'raster', url: url , tileSize: 256})
+            map.addSource('raster', { type: 'raster', url: url, tileSize: 256})            
             addLayer(vizType)
             break
-
         case 'point':
             map.addSource('mvt', {
                 type: 'vector',
-                url: `${api_endpoint}/tilejson.json?tile_format=pbf&feature_type=point&resampling_method=${params.resampling_method}`
+                url: `${api_endpoint}/tilejson.json?url=${scope.url}tile_format=pbf&feature_type=point&resampling_method=${params.resampling_method}`,
             })
             addLayer(vizType)
             break
-
         case 'polygon':
             map.addSource('mvt', {
                 type: 'vector',
-                url: `${api_endpoint}/tilejson.json?tile_format=pbf&feature_type=polygon&resampling_method=${params.resampling_method}`
+                url: `${api_endpoint}/tilejson.json?url=${scope.url}&tile_format=pbf&feature_type=polygon&resampling_method=${params.resampling_method}`,
             })
             addLayer(vizType)
             break
-
         default:
             throw new Error(`Invalid ${vizType}`)
     }
@@ -423,7 +418,6 @@ const set3bViz = () => {
     let params = {
         url: scope.url,
         resampling_method:  document.getElementById('resamp-selector').querySelector("input[name='toggle-resamp']:checked").value,
-        tile_format: 'png',
         indexes: `${r},${g},${b}`
     }
 
@@ -438,7 +432,7 @@ const set3bViz = () => {
     }
     const url_params = Object.keys(params).map(i => `${i}=${params[i]}`).join('&')
     let url = `${api_endpoint}/tilejson.json?${url_params}`
-    map.addSource('raster', { type: 'raster', url: url, tileSize: 256})
+    map.addSource('raster', { type: 'raster', url: url , tileSize: 256})
     map.addLayer({id: 'raster', type: 'raster', source: 'raster'})
     addHisto3Bands()
 }
@@ -446,7 +440,6 @@ const set3bViz = () => {
 const switchViz = () => {
     if (map.getLayer('raster')) map.removeLayer('raster')
     if (map.getSource('raster')) map.removeSource('raster')
-
     if (map.getLayer('mvt')) map.removeLayer('mvt')
     if (map.getSource('mvt')) { map.removeSource('mvt') }
 
@@ -484,7 +477,6 @@ const addLayer = (layerType) => {
                 source: 'raster'
             })
             break
-
         case 'point':
             map.addLayer({
                 id: 'mvt',
@@ -509,7 +501,6 @@ const addLayer = (layerType) => {
                 }
             })
             break
-
         case 'polygon':
             map.addLayer({
                 id: 'mvt',
@@ -534,9 +525,7 @@ const addLayer = (layerType) => {
                     ]
                 }
             })
-
         break
-
         default:
             throw new Error(`Invalid ${layerType}`)
     }
