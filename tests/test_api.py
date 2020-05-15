@@ -72,7 +72,7 @@ def test_API_tilejson(app, event):
 
     urlqs = urllib.parse.urlencode([("url", cog_path)])
 
-    event["path"] = f"/tilejson.json"
+    event["path"] = "/tilejson.json"
     res = app(event, {})
     assert res["statusCode"] == 500
     headers = res["headers"]
@@ -80,7 +80,7 @@ def test_API_tilejson(app, event):
     body = json.loads(res["body"])
     assert "url" in body["errorMessage"]
 
-    event["path"] = f"/tilejson.json"
+    event["path"] = "/tilejson.json"
     event["queryStringParameters"] = {"url": cog_path, "tile_scale": "2"}
     res = app(event, {})
     assert res["statusCode"] == 200
@@ -90,7 +90,7 @@ def test_API_tilejson(app, event):
     assert body["name"] == "cog.tif"
     assert body["tilejson"] == "2.1.0"
     assert body["tiles"][0] == (
-        f"https://somewhere-over-the-rainbow.com/{{z}}/{{x}}/{{y}}@2x?{urlqs}"
+        "https://somewhere-over-the-rainbow.com/{{z}}/{{x}}/{{y}}@2x?{urlqs}"
     )
     assert len(body["bounds"]) == 4
     assert len(body["center"]) == 3
@@ -98,7 +98,7 @@ def test_API_tilejson(app, event):
     assert body["maxzoom"] == 8
 
     # test with tile_format
-    event["path"] = f"/tilejson.json"
+    event["path"] = "/tilejson.json"
     event["queryStringParameters"] = {"url": cog_path, "tile_format": "jpg"}
     res = app(event, {})
     assert res["statusCode"] == 200
@@ -106,11 +106,11 @@ def test_API_tilejson(app, event):
     assert headers["Content-Type"] == "application/json"
     body = json.loads(res["body"])
     assert body["tiles"][0] == (
-        f"https://somewhere-over-the-rainbow.com/{{z}}/{{x}}/{{y}}@1x.jpg?{urlqs}"
+        "https://somewhere-over-the-rainbow.com/{{z}}/{{x}}/{{y}}@1x.jpg?{urlqs}"
     )
 
     # test with kwargs
-    event["path"] = f"/tilejson.json"
+    event["path"] = "/tilejson.json"
     event["queryStringParameters"] = {"url": cog_path, "rescale": "-1,1"}
     res = app(event, {})
     assert res["statusCode"] == 200
@@ -126,7 +126,7 @@ def test_API_bounds(app, event):
     """Test /bounds route."""
     from cogeo_tiler.handler import app
 
-    event["path"] = f"/bounds"
+    event["path"] = "/bounds"
     res = app(event, {})
     assert res["statusCode"] == 500
     headers = res["headers"]
@@ -134,7 +134,7 @@ def test_API_bounds(app, event):
     body = json.loads(res["body"])
     assert "url" in body["errorMessage"]
 
-    event["path"] = f"/bounds"
+    event["path"] = "/bounds"
     event["queryStringParameters"] = {"url": cog_path}
     res = app(event, {})
     assert res["statusCode"] == 200
@@ -149,7 +149,7 @@ def test_API_metadata(app, event):
     """Test /metadata route."""
     from cogeo_tiler.handler import app
 
-    event["path"] = f"/metadata"
+    event["path"] = "/metadata"
     res = app(event, {})
     assert res["statusCode"] == 500
     headers = res["headers"]
@@ -157,7 +157,7 @@ def test_API_metadata(app, event):
     body = json.loads(res["body"])
     assert "url" in body["errorMessage"]
 
-    event["path"] = f"/metadata"
+    event["path"] = "/metadata"
     event["queryStringParameters"] = {"url": cog_path}
     res = app(event, {})
     assert res["statusCode"] == 200
@@ -169,7 +169,7 @@ def test_API_metadata(app, event):
     assert len(body["statistics"]["1"]["histogram"][0]) == 20
     assert body["band_descriptions"]
 
-    event["path"] = f"/metadata"
+    event["path"] = "/metadata"
     event["queryStringParameters"] = {"url": cog_path, "histogram_bins": "10"}
     res = app(event, {})
     assert res["statusCode"] == 200
@@ -199,7 +199,7 @@ def test_API_wmts(app, event):
     """Test /wmts route."""
     from cogeo_tiler.handler import app
 
-    event["path"] = f"/wmts"
+    event["path"] = "/wmts"
     event["queryStringParameters"] = {"url": cog_path}
     res = app(event, {})
     assert res["statusCode"] == 200
@@ -224,7 +224,7 @@ def test_API_point(app, event):
     """Test /point route."""
     from cogeo_tiler.handler import app
 
-    event["path"] = f"/point"
+    event["path"] = "/point"
     event["queryStringParameters"] = {
         "url": cog_path,
         "lon": "-2.0",
@@ -267,7 +267,7 @@ def test_API_tiles(app, event):
     from cogeo_tiler.handler import app
 
     # test missing url in queryString
-    event["path"] = f"/7/62/44.jpg"
+    event["path"] = "/7/62/44.jpg"
     res = app(event, {})
     assert res["statusCode"] == 500
     headers = res["headers"]
@@ -276,7 +276,7 @@ def test_API_tiles(app, event):
     assert body["errorMessage"] == "Missing 'url' parameter"
 
     # test missing expr and indexes in queryString
-    event["path"] = f"/7/62/44.jpg"
+    event["path"] = "/7/62/44.jpg"
     event["queryStringParameters"] = {"url": cog_path, "indexes": "1", "expr": "b1/b1"}
     res = app(event, {})
     assert res["statusCode"] == 500
@@ -286,7 +286,7 @@ def test_API_tiles(app, event):
     assert body["errorMessage"] == "Cannot pass indexes and expression"
 
     # test valid request with linear rescaling
-    event["path"] = f"/7/62/44.png"
+    event["path"] = "/7/62/44.png"
     event["queryStringParameters"] = {
         "url": cog_path,
         "rescale": "0,10000",
@@ -300,7 +300,7 @@ def test_API_tiles(app, event):
     assert res["isBase64Encoded"]
 
     # test valid request with expression
-    event["path"] = f"/7/62/44.png"
+    event["path"] = "/7/62/44.png"
     event["queryStringParameters"] = {
         "url": cog_path,
         "expr": "b1/b1",
@@ -314,7 +314,7 @@ def test_API_tiles(app, event):
     assert res["isBase64Encoded"]
 
     # test valid jpg request with linear rescaling
-    event["path"] = f"/7/62/44.jpg"
+    event["path"] = "/7/62/44.jpg"
     event["queryStringParameters"] = {
         "url": cog_path,
         "rescale": "0,10000",
@@ -329,7 +329,7 @@ def test_API_tiles(app, event):
     assert res["isBase64Encoded"]
 
     # test valid jpg request with rescaling and colormap
-    event["path"] = f"/7/62/44.png"
+    event["path"] = "/7/62/44.png"
     event["queryStringParameters"] = {
         "url": cog_path,
         "rescale": "0,10000",
@@ -343,7 +343,7 @@ def test_API_tiles(app, event):
     assert res["isBase64Encoded"]
 
     # test scale (512px tile size)
-    event["path"] = f"/7/62/44@2x.png"
+    event["path"] = "/7/62/44@2x.png"
     event["queryStringParameters"] = {"url": cog_path, "rescale": "0,10000"}
     res = app(event, {})
     assert res["statusCode"] == 200
@@ -353,7 +353,7 @@ def test_API_tiles(app, event):
     assert res["isBase64Encoded"]
 
     # test no ext (partial: png)
-    event["path"] = f"/7/62/44"
+    event["path"] = "/7/62/44"
     event["queryStringParameters"] = {"url": cog_path, "rescale": "0,10000"}
     res = app(event, {})
     assert res["statusCode"] == 200
@@ -363,7 +363,7 @@ def test_API_tiles(app, event):
     assert res["isBase64Encoded"]
 
     # test no ext (full: jpeg)
-    event["path"] = f"/8/126/87"
+    event["path"] = "/8/126/87"
     event["httpMethod"] = "GET"
     event["queryStringParameters"] = {"url": cog_path, "rescale": "0,10000"}
     res = app(event, {})
@@ -374,7 +374,7 @@ def test_API_tiles(app, event):
     assert res["isBase64Encoded"]
 
     # test tif
-    event["path"] = f"/8/126/87.tif"
+    event["path"] = "/8/126/87.tif"
     event["queryStringParameters"] = {"url": cog_path}
     res = app(event, {})
     assert res["statusCode"] == 200
@@ -384,7 +384,7 @@ def test_API_tiles(app, event):
     assert headers["Content-Type"] == "image/tiff"
 
     # test npy
-    event["path"] = f"/8/126/87.npy"
+    event["path"] = "/8/126/87.npy"
     event["queryStringParameters"] = {"url": cog_path}
     res = app(event, {})
     assert res["statusCode"] == 200
@@ -410,7 +410,7 @@ def test_API_tilesMock(tiler, app, event):
     tiler.return_value = (tile, mask)
 
     # test no ext
-    event["path"] = f"/8/126/87"
+    event["path"] = "/8/126/87"
     event["queryStringParameters"] = {"url": cog_path, "rescale": "0,10000"}
     res = app(event, {})
     assert res["statusCode"] == 200
