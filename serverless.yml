@@ -6,6 +6,9 @@ provider:
   stage: ${opt:stage, 'production'}
   region: ${opt:region, 'us-east-1'}
 
+  httpApi:
+    cors: true
+
   #############################################################################
   # Optional
   # Add Tags to resources
@@ -18,9 +21,11 @@ provider:
   iamRoleStatements:
   -  Effect: "Allow"
      Action:
-       - "*"
+       - "s3:GetObject"
+       - "s3:HeadObject"
      Resource:
        - "arn:aws:s3:::${opt:bucket}*"
+       - "arn:aws:s3:::*"
   #############################################################################
   
   apiGateway:
@@ -32,12 +37,14 @@ package:
   artifact: package.zip
 
 functions:
-  lambda-tiler:
+  app:
     handler: cogeo_tiler.handler.app
     memorySize: 1536
     timeout: 10
     layers:
-      - arn:aws:lambda:${self:provider.region}:524387336408:layer:gdal30-py37-cogeo:8
+      # See https://github.com/lambgeo/geo-layer
+      - arn:aws:lambda:${self:provider.region}:524387336408:layer:gdal24-py37-geolayer:1
+
     environment:
       CPL_TMPDIR: /tmp
       GDAL_CACHEMAX: 25%
@@ -52,7 +59,6 @@ functions:
       VSI_CACHE: TRUE
       VSI_CACHE_SIZE: 536870912
     events:
-      - http:
+      - httpApi:
           path: /{proxy+}
-          method: get
-          cors: true
+          method: '*'

@@ -26,6 +26,10 @@ $ cd cogeo-tiler && make package
 ```
 
 #### Deploy to AWS
+
+To ease deployment (and to make package lighter) we are using [lambgeo/geo-layer](https://github.com/lambgeo/geo-layer) AWS Layer.
+The layer might not be available in all the region but you can deploy you own by following this [steps](https://github.com/lambgeo/geo-layer#create-new-lambda-layer)
+
 ```bash
 #configure serverless (https://serverless.com/framework/docs/providers/aws/guide/credentials/)
 npm install
@@ -33,6 +37,8 @@ sls deploy
 ```
 
 # API
+
+Swagger documentation: https://cog.cogeo.xyz/docs
 
 ## TileJSON (2.1.0)
 `/tilejson.json` - GET
@@ -86,7 +92,6 @@ Inputs:
 - **pmax** (optional, str): max percentile (default: 98).
 - **nodata** (optional, str): Custom nodata value if not preset in dataset.
 - **indexes** (optional, str): dataset band indexes
-- **overview_level** (optional, str): Select the overview level to fetch for statistic calculation
 - **max_size** (optional, str): Maximum size of dataset to retrieve for overview level automatic calculation
 - **histogram_bins** (optional, str, default:20): number of equal-width histogram bins
 - **histogram_range** (optional, str): histogram min/max
@@ -100,7 +105,6 @@ Outputs:
 ```json
 {
     "address": "s3://myfile.tif",
-    "bbox": [...],
     "band_descriptions": [(1, "red"), (2, "green"), (3, "blue"), (4, "nir")],
     "statistics": {
         "1": {
@@ -150,3 +154,7 @@ Outputs:
 Note: 
 - **expr** and **indexes** cannot be passed used together
 - if no **ext** passed, lambda-tiler will choose the best format (jpg or png) depending on mask (use png for tile with nodata)
+
+
+## Docs 
+`/docs` - GET
