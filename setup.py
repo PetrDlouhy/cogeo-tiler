@@ -1,9 +1,9 @@
 """Setup cogeo-tiler"""
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 # Runtime requirements.
-inst_reqs = ["lambda-proxy~=5.0", "rio-tiler~=1.3", "rio-color"]
+inst_reqs = ["lambda-proxy~=5.2", "rio-tiler>=2.0a6", "rio-color"]
 
 extra_reqs = {
     "test": ["mock", "pytest", "pytest-cov"],
@@ -12,7 +12,7 @@ extra_reqs = {
 
 setup(
     name="cogeo-tiler",
-    version="0.0.2",
+    version="0.1.0",
     description=u"Create and serve Map tile from Cloud Optimized GeoTIFF.",
     long_description=u"Create and serve Map tile from Cloud Optimized GeoTIFF.",
     python_requires=">=3",

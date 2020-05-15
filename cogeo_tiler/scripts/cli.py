@@ -1,13 +1,11 @@
 """Test cogeo-tiler locally."""
 
-import click
 import base64
-
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from socketserver import ThreadingMixIn
+from urllib.parse import parse_qsl, urlparse
 
-from urllib.parse import urlparse, parse_qsl
-from http.server import HTTPServer, BaseHTTPRequestHandler
-
+import click
 from cogeo_tiler.handler import app
 
 # Local server is unsecure
