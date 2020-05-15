@@ -90,7 +90,7 @@ def test_API_tilejson(app, event):
     assert body["name"] == "cog.tif"
     assert body["tilejson"] == "2.1.0"
     assert body["tiles"][0] == (
-        "https://somewhere-over-the-rainbow.com/{{z}}/{{x}}/{{y}}@2x?{urlqs}"
+        f"https://somewhere-over-the-rainbow.com/{{z}}/{{x}}/{{y}}@2x?{urlqs}"
     )
     assert len(body["bounds"]) == 4
     assert len(body["center"]) == 3
@@ -106,7 +106,7 @@ def test_API_tilejson(app, event):
     assert headers["Content-Type"] == "application/json"
     body = json.loads(res["body"])
     assert body["tiles"][0] == (
-        "https://somewhere-over-the-rainbow.com/{{z}}/{{x}}/{{y}}@1x.jpg?{urlqs}"
+        f"https://somewhere-over-the-rainbow.com/{{z}}/{{x}}/{{y}}@1x.jpg?{urlqs}"
     )
 
     # test with kwargs
