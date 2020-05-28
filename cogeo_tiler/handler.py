@@ -230,11 +230,11 @@ def _tile(
         driver = drivers[ext]
         options = img_profiles.get(driver.lower(), {})
 
-        if color_map:
-            options["colormap"] = cmap.get(color_map)
-
         if ext == "tif":
             options = geotiff_options(x, y, z, tilesize=tilesize)
+
+        if color_map:
+            options["colormap"] = cmap.get(color_map)
 
         content = render(tile, mask, img_format=driver, **options)
 
