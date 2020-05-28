@@ -14,10 +14,9 @@ from cogeo_tiler.common import drivers, mimetype
 from cogeo_tiler.ogc import wmts_template
 from lambda_proxy.proxy import API
 from rasterio.session import AWSSession
-from rio_tiler.colormap import get_colormap
+from rio_tiler.colormap import cmap
 from rio_tiler.io import cogeo
 from rio_tiler.profiles import img_profiles
-from rio_tiler.reader import point as pointReader
 from rio_tiler.utils import expression, geotiff_options, render
 
 app = API(name="cogeo-tiler")
@@ -222,9 +221,6 @@ def _tile(
 
     tile = utils.postprocess(tile, mask, rescale=rescale, color_formula=color_formula)
 
-    if color_map:
-        color_map = get_colormap(color_map)
-
     if ext == "npy":
         sio = io.BytesIO()
         numpy.save(sio, (tile, mask))
@@ -233,10 +229,14 @@ def _tile(
     else:
         driver = drivers[ext]
         options = img_profiles.get(driver.lower(), {})
+
         if ext == "tif":
             options = geotiff_options(x, y, z, tilesize=tilesize)
 
-        content = render(tile, mask, img_format=driver, colormap=color_map, **options)
+        if color_map:
+            options["colormap"] = cmap.get(color_map)
+
+        content = render(tile, mask, img_format=driver, **options)
 
     return ("OK", mimetype[ext], content)
 
@@ -252,8 +252,7 @@ def _point(
         indexes = tuple(map(int, indexes.split(",")))
 
     with rasterio.Env(aws_session):
-        with rasterio.open(url) as src_dst:
-            values = pointReader(src_dst, (lon, lat), indexes=indexes, **kwargs)
+        values = cogeo.point(url, lon, lat, indexes=indexes, **kwargs)
 
     return (
         "OK",
