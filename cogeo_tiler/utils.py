@@ -3,6 +3,7 @@
 import numpy
 from rio_color.operations import parse_operations
 from rio_color.utils import scale_dtype, to_math_type
+
 from rio_tiler.utils import _chunks, linear_rescale
 
 
