@@ -6,7 +6,8 @@ from socketserver import ThreadingMixIn
 from urllib.parse import parse_qsl, urlparse
 
 import click
-from cogeo_tiler.handler import app
+
+from ..handler import app
 
 # Local server is unsecure
 app.https = False

@@ -8,7 +8,6 @@ from io import BytesIO
 
 import numpy
 import pytest
-from mock import patch
 
 cog_path = os.path.join(os.path.dirname(__file__), "fixtures", "cog.tif")
 
@@ -395,32 +394,3 @@ def test_API_tiles(app, event):
     data, datamask = numpy.load(BytesIO(body), allow_pickle=True)
     assert data.shape == (1, 256, 256)
     assert datamask.shape == (256, 256)
-
-
-@patch("cogeo_tiler.handler.cogeo.tile")
-def test_API_tilesMock(tiler, app, event):
-    """Tests if route pass the right variables."""
-    from cogeo_tiler.handler import app
-
-    tilesize = 256
-    tile = numpy.random.rand(3, tilesize, tilesize).astype(numpy.int16)
-    mask = numpy.full((tilesize, tilesize), 255)
-    mask[0:100, 0:100] = 0
-
-    tiler.return_value = (tile, mask)
-
-    # test no ext
-    event["path"] = "/8/126/87"
-    event["queryStringParameters"] = {"url": cog_path, "rescale": "0,10000"}
-    res = app(event, {})
-    assert res["statusCode"] == 200
-    assert res["body"]
-    assert res["isBase64Encoded"]
-    headers = res["headers"]
-    assert headers["Content-Type"] == "image/png"
-    kwargs = tiler.call_args[1]
-    assert kwargs["tilesize"] == 256
-    vars = tiler.call_args[0]
-    assert vars[1] == 126
-    assert vars[2] == 87
-    assert vars[3] == 8

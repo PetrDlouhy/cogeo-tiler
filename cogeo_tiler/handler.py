@@ -9,15 +9,17 @@ from typing import Any, Dict, Optional, Tuple, Union
 import numpy
 import rasterio
 from boto3.session import Session as boto3_session
-from cogeo_tiler import utils
-from cogeo_tiler.common import drivers, mimetype
-from cogeo_tiler.ogc import wmts_template
 from lambda_proxy.proxy import API
 from rasterio.session import AWSSession
+
 from rio_tiler.colormap import cmap
-from rio_tiler.io import cogeo
+from rio_tiler.io import COGReader
 from rio_tiler.profiles import img_profiles
-from rio_tiler.utils import expression, geotiff_options, render
+from rio_tiler.utils import geotiff_options, render
+
+from . import utils
+from .common import drivers, mimetype
+from .ogc import wmts_template
 
 app = API(name="cogeo-tiler")
 aws_session = AWSSession(session=boto3_session())
@@ -36,7 +38,10 @@ route_params = dict(
 def _bounds(url: str) -> Tuple[str, str, str]:
     """Handle /bounds requests."""
     with rasterio.Env(aws_session):
-        return ("OK", "application/json", json.dumps(cogeo.bounds(url)))
+        with COGReader(url) as cog:
+            info = {"address": url, "bounds": cog.bounds}
+
+    return ("OK", "application/json", json.dumps(info))
 
 
 @app.get("/metadata", tag=["metadata"], **route_params)
@@ -70,21 +75,18 @@ def _metadata(
         hist_options.update(dict(range=list(map(float, histogram_range.split(",")))))
 
     with rasterio.Env(aws_session):
-        return (
-            "OK",
-            "application/json",
-            json.dumps(
-                cogeo.metadata(
-                    url,
-                    pmin,
-                    pmax,
-                    nodata=nodata,
-                    indexes=indexes,
-                    max_size=max_size,
-                    hist_options=hist_options,
-                )
-            ),
-        )
+        with COGReader(url) as cog:
+            metadata = cog.metadata(
+                pmin,
+                pmax,
+                hist_options=hist_options,
+                nodata=nodata,
+                indexes=indexes,
+                max_size=max_size,
+            )
+
+    metadata.update({"address": url})
+    return ("OK", "application/json", json.dumps(metadata))
 
 
 @app.get("/tilejson.json", tag=["tiles"], **route_params)
@@ -103,7 +105,8 @@ def _tilejson(
         tile_url = f"{app.host}/{{z}}/{{x}}/{{y}}@{tile_scale}x?{qs}"
 
     with rasterio.Env(aws_session):
-        info = cogeo.spatial_info(url)
+        with COGReader(url) as cog:
+            info = cog.spatial_info()
 
     meta = dict(
         bounds=info["bounds"],
@@ -141,7 +144,8 @@ def _wmts(
     query_string = query_string.replace("&", "&amp;")
 
     with rasterio.Env(aws_session):
-        info = cogeo.spatial_info(url)
+        with COGReader(url) as cog:
+            info = cog.spatial_info()
 
     return (
         "OK",
@@ -170,13 +174,14 @@ def _tile(
     scale: int = 1,
     ext: str = None,
     url: str = None,
-    indexes: Optional[Tuple] = None,
+    indexes: Optional[Union[str, Tuple]] = None,
     expr: Optional[str] = None,
     nodata: Optional[Union[str, int, float]] = None,
     rescale: Optional[str] = None,
     color_formula: Optional[str] = None,
     color_map: Optional[str] = None,
     resampling_method: str = "bilinear",
+    **kwargs,
 ) -> Tuple[str, str, bytes]:
     """Handle /tiles requests."""
     if indexes and expr:
@@ -190,30 +195,21 @@ def _tile(
 
     tilesize = scale * 256
 
+    if isinstance(indexes, str):
+        indexes = tuple(map(int, indexes.split(",")))
+
     with rasterio.Env(aws_session):
-        if expr is not None:
-            tile, mask = expression(
-                url,
+        with COGReader(url) as cog:
+            tile, mask = cog.tile(
                 x,
                 y,
                 z,
-                expr,
                 tilesize=tilesize,
-                nodata=nodata,
-                resampling_method=resampling_method,
-            )
-        else:
-            if isinstance(indexes, str):
-                indexes = tuple(map(int, indexes.split(",")))
-            tile, mask = cogeo.tile(
-                url,
-                x,
-                y,
-                z,
                 indexes=indexes,
-                tilesize=tilesize,
+                expression=expr,
                 nodata=nodata,
                 resampling_method=resampling_method,
+                **kwargs,
             )
 
     if not ext:
@@ -243,7 +239,12 @@ def _tile(
 
 @app.get("/point", tag=["point"], **route_params)
 def _point(
-    url: str, lon: float, lat: float, indexes: Optional[Tuple] = None, **kwargs,
+    url: str,
+    lon: float,
+    lat: float,
+    indexes: Optional[Tuple] = None,
+    expr: Optional[str] = None,
+    **kwargs,
 ) -> Tuple[str, str, str]:
     """Handle /point requests."""
     lon = float(lon) if isinstance(lon, str) else lon
@@ -252,7 +253,8 @@ def _point(
         indexes = tuple(map(int, indexes.split(",")))
 
     with rasterio.Env(aws_session):
-        values = cogeo.point(url, lon, lat, indexes=indexes, **kwargs)
+        with COGReader(url) as cog:
+            values = cog.point(lon, lat, indexes=indexes, expression=expr, **kwargs)
 
     return (
         "OK",
