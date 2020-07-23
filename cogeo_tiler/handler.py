@@ -211,6 +211,7 @@ def _tile(
                 resampling_method=resampling_method,
                 **kwargs,
             )
+            color_map = cmap.get(color_map) if color_map else cog.colormap
 
     if not ext:
         ext = "jpg" if mask.all() else "png"
@@ -230,7 +231,7 @@ def _tile(
             options = geotiff_options(x, y, z, tilesize=tilesize)
 
         if color_map:
-            options["colormap"] = cmap.get(color_map)
+            options["colormap"] = color_map
 
         content = render(tile, mask, img_format=driver, **options)
 
